@@ -10,6 +10,7 @@ def compute_recall(pars, rars, alpha, bias_function):
     beta = 1 - alpha
 
     while i < len(rars):
+        overlap = 0
         #finding out the first par which overlaps current rar
         while (j < len(pars)) and pars[j][0] <= rars[i][1]:
             if pars[j][1] >= rars[i][0]:
@@ -91,7 +92,6 @@ def compute_precision(pars, rars, bias_function):
             overlap += (end - start + 1)
             overlapping_points = set()
             for x in range(start, end+1):
-                print(x, "\n")
                 overlapping_points.add(x)
 
             temp_value += f(pars[i], overlapping_points, bias_function)
@@ -123,13 +123,13 @@ def f(base_range, overlap_set, bias_function):
 
 #compute metrics: recall, precision, F scores
 #predicted_data and actual_data are both arrays of windows i.e. ([[start_1, end_1],[start_2,end_1]])
-def compute_metrics(pars, rars, beta):
-    alpha = 0.8
+def compute_metrics(pars, rars, alpha_recall, beta_Fscore):
+    
 
     precision = compute_precision(pars, rars, flat)
-    recall = compute_recall(pars, rars, alpha, flat)
+    recall = compute_recall(pars, rars, alpha_recall, flat)
 
-    F_beta = (1+((beta)**2)) * ((precision * recall)/(((beta)**2 * precision) +recall)) if (precision+recall) != 0 else 0.0
+    F_beta = (1+((beta_Fscore)**2)) * ((precision * recall)/(((beta_Fscore)**2 * precision) +recall)) if (precision+recall) != 0 else 0.0
     F1 = 2 * ((precision * recall)/(precision + recall)) if (precision+recall) != 0 else 0.0
 
     return precision, recall, F_beta, F1
@@ -162,10 +162,668 @@ def main():
     # threshold_train_file = sys.argv[2]
     # test_file = sys.argv[3]
 
-    pars = [[7,11]]
-    rars = [[6,7]]
-    precision, recall, F_beta, F1 = compute_metrics(pars, rars, 0.1)
-    print("precsion: ", precision, ", recall: ", recall)
+    epsilon = 0.000000001
+    
+    fail_count =0
+    print("Assume alpha_r=0.8")
+    
+    #Recall
+    #Full coverage
+    #Equals
+    #single_b
+    rars = [[5,9]]
+    pars = [[5,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 1.0
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1
+    print("Recall, Full coverage, Equals, single_b, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+ 
+    #Recall
+    #Full coverage
+    #Equals
+    #multiple_b
+    rars = [[5,9]]
+    pars = [[5,5],[6,6],[7,7],[8,8],[9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Full coverage, Equals, multiple_b's, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Full coverage
+    #Starts
+    #single_b
+    rars = [[5,9]]
+    pars = [[5,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 1.0
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Full coverage, Starts, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Full coverage
+    #Starts
+    #multiple_b's
+    rars = [[5,9]]
+    pars = [[5,5],[6,6],[7,7],[8,8],[9,9],[10,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Full coverage, Starts, multiple_b's, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+
+    #Recall
+    #Full coverage
+    #During
+    #single_b
+    rars = [[5,9]]
+    pars = [[4,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 1.0
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Full coverage, During, single_b, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Full coverage
+    #During
+    #multiple_b's
+    rars = [[5,9]]
+    pars = [[4,4],[5,5],[6,6],[7,7],[8,8],[9,9],[10,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Full coverage, During, multiple_b's, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Full coverage
+    #Finishes
+    #single_b
+    rars = [[5,9]]
+    pars = [[4,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 1.0
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+
+    print("Recall, Full coverage, Finishes, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Full coverage
+    #Finishes
+    #multiple_b's
+    rars = [[5,9]]
+    pars = [[4,4],[5,5],[6,6],[7,7],[8,8],[9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1
+    print("Recall, Full coverage, Finishes, multiple_b's, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+
+    #Recall
+    #Partial coverage
+    #Overlaps
+    #single_b
+    rars = [[5,9]]
+    pars = [[8,12]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.88
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Overlaps, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Partial coverage
+    #Overlaps
+    #multiple_b's & contiguous
+    rars = [[5,9]]
+    pars = [[8,8],[9,9],[10,10],[11,11],[12,12]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1
+
+    print("Recall, Partial coverage, Overlaps, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #Overlaps
+    #multiple_b's & non-contiguous
+    rars = [[5,9]]
+    pars = [[6,6], [8,8], [9,9], [10,10], [11,11]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Overlaps, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #Overlapped by
+    #single_b
+    rars = [[13,17]]
+    pars = [[8,14]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.88
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Overlapped by, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Partial coverage
+    #Overlapped by
+    #multiple_b's & contiguous
+    rars = [[13,17]]
+    pars = [[8,8],[9,9],[10,10],[11,11],[12,12], [13,13], [14,14]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Overlapped by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+
+    #Recall
+    #Partial coverage
+    #Overlapped by
+    #multiple_b's & non-contiguous
+    rars = [[13,17]]
+    pars = [[8,8],[9,9],[10,10],[11,11],[12,12], [13,13],[15, 15]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1
+    print("Recall, Partial coverage, Overlapped by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #Started by
+    #single_b
+    rars = [[5,9]]
+    pars = [[5,6]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.88
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Started by, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Partial coverage
+    #Started by
+    #multiple_b's & contiguous
+    rars = [[5,9]]
+    pars = [[5,5],[6,6]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Started by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #Started by
+    #multiple_b's & non-contiguous
+    rars = [[5,9]]
+    pars = [[5,5], [7,7]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Started by, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+
+    #Recall
+    #Partial coverage
+    #Finished by
+    #single_b
+    rars = [[5,9]]
+    pars = [[8,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.88
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Finished by, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Partial coverage
+    #Finished by
+    #multiple_b's & contiguous
+    rars = [[5,9]]
+    pars = [[8,8],[9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Finished by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #Finished by
+    #multiple_b's & non-contiguous
+    rars = [[5,9]]
+    pars = [[7,7], [9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Finished by, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #During
+    #single_b
+    rars = [[5,9]]
+    pars = [[7,8]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.88
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, During, single_b, pars=", pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)    
+
+    #Recall
+    #Partial coverage
+    #During
+    #multiple_b's & contiguous
+    rars = [[5,9]]
+    pars = [[7,7],[8,8]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, During, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Recall
+    #Partial coverage
+    #Started by
+    #multiple_b's & non-contiguous
+    rars = [[5,9]]
+    pars = [[6,6], [8,8]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    recall_expected = 0.84
+    success = abs(recall_expected-recall)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, During, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+
+    
+    # #Start testing precision!!!!!!!!!!!
+    
+
+
+    #Precision
+    #Full coverage
+    #Equals
+    #single_b
+    pars = [[5,9]]
+    rars = [[5,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 1.0
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1
+    print("Precision, Full coverage, Equals, single_b, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+ 
+    #Precision
+    #Full coverage
+    #Equals
+    #multiple_b
+    pars = [[5,9]]
+    rars = [[5,5],[6,6],[7,7],[8,8],[9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Full coverage, Equals, multiple_b's, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Full coverage
+    #Starts
+    #single_b
+    pars = [[5,9]]
+    rars = [[5,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 1.0
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Full coverage, Starts, single_b, pars=", pars, ", rars=",rars,"precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Full coverage
+    #Starts
+    #multiple_b's
+    pars = [[5,9]]
+    rars = [[5,5],[6,6],[7,7],[8,8],[9,9],[10,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Full coverage, Starts, multiple_b's, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+
+    #Precision
+    #Full coverage
+    #During
+    #single_b
+    pars = [[5,9]]
+    rars = [[4,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 1.0
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Full coverage, During, single_b, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Full coverage
+    #During
+    #multiple_b's
+    pars = [[5,9]]
+    rars = [[4,4],[5,5],[6,6],[7,7],[8,8],[9,9],[10,10]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Full coverage, During, multiple_b's, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Full coverage
+    #Finishes
+    #single_b
+    pars = [[5,9]]
+    rars = [[4,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 1.0
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+
+    print("Precision, Full coverage, Finishes, single_b, pars=", pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Full coverage
+    #Finishes
+    #multiple_b's
+    pars = [[5,9]]
+    rars = [[4,4],[5,5],[6,6],[7,7],[8,8],[9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1
+    print("Precision, Full coverage, Finishes, multiple_b's, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+
+    #Precision
+    #Partial coverage
+    #Overlaps
+    #single_b
+    pars = [[5,9]]
+    rars = [[8,12]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.4
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Overlaps, single_b, pars=", pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Partial coverage
+    #Overlaps
+    #multiple_b's & contiguous
+    pars = [[5,9]]
+    rars = [[8,8],[9,9],[10,10],[11,11],[12,12]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1
+
+    print("Precision, Partial coverage, Overlaps, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #Overlaps
+    #multiple_b's & non-contiguous
+    pars = [[5,9]]
+    rars = [[6,6], [8,8], [9,9], [10,10], [11,11]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Overlaps, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #Overlapped by
+    #single_b
+    pars = [[13,17]]
+    rars = [[8,14]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.4
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Overlapped by, single_b, pars=", pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Partial coverage
+    #Overlapped by
+    #multiple_b's & contiguous
+    pars = [[13,17]]
+    rars = [[8,8],[9,9],[10,10],[11,11],[12,12], [13,13], [14,14]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Overlapped by, multiple_b's & contiguous, pars=",pars, ", rars=",rars,"precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+
+    #Precision
+    #Partial coverage
+    #Overlapped by
+    #multiple_b's & non-contiguous
+    pars = [[13,17]]
+    rars = [[8,8],[9,9],[10,10],[11,11],[12,12], [13,13],[15, 15]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1
+    print("Precision, Partial coverage, Overlapped by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #Started by
+    #single_b
+    pars = [[5,9]]
+    rars = [[5,6]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.4
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Started by, single_b, pars=", pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Partial coverage
+    #Started by
+    #multiple_b's & contiguous
+    pars = [[5,9]]
+    rars = [[5,5],[6,6]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Recall, Partial coverage, Started by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "recall_expected: ", recall_expected, ", recall_acutal: ", recall, ", precision_actual: ", precision, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #Started by
+    #multiple_b's & non-contiguous
+    pars = [[5,9]]
+    rars = [[5,5], [7,7]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Started by, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+
+    #Precision
+    #Partial coverage
+    #Finished by
+    #single_b
+    pars = [[5,9]]
+    rars = [[8,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.4
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Finished by, single_b, pars=", pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Partial coverage
+    #Finished by
+    #multiple_b's & contiguous
+    pars = [[5,9]]
+    rars = [[8,8],[9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Finished by, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #Finished by
+    #multiple_b's & non-contiguous
+    pars = [[5,9]]
+    rars = [[7,7], [9,9]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, Finished by, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #During
+    #single_b
+    pars = [[5,9]]
+    rars = [[7,8]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.4
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, During, single_b, pars=", pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)    
+
+    #Precision
+    #Partial coverage
+    #During
+    #multiple_b's & contiguous
+    pars = [[5,9]]
+    rars = [[7,7],[8,8]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, During, multiple_b's & contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    #Precision
+    #Partial coverage
+    #Started by
+    #multiple_b's & non-contiguous
+    pars = [[5,9]]
+    rars = [[6,6], [8,8]]
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    precision_expected = 0.2
+    success = abs(precision_expected-precision)<epsilon
+    if success==False:
+        fail_count += 1    
+    print("Precision, Partial coverage, During, multiple_b's & non-contiguous, pars=",pars, ", rars=",rars, "precision_expected: ", precision_expected, ", precision_acutal: ", precision, ", recall_actual: ", recall, "success: ", success)
+
+    print("Additional Tests")
+    pars = [[5,8], [13,16]]
+    rars = [[7,16]]
+    precision_expected = 0.75
+    recall_expected = 0.86
+    precision, recall, _, _ = compute_metrics(pars, rars, 0.8, 0.1)
+    success = (abs(precision_expected-precision)<epsilon) and (abs(recall_expected-recall)<epsilon)
+    if success==False:
+        fail_count += 1    
+
+    print("pars=",pars, ", rars=",rars,"precision_expected: ", precision_expected, ", precision_acutal: ", precision, "recall_expected: ", recall_expected, ", recall_actual: ", recall, "success: ", success)
+
+    pars = [[4,8]]
+    rars = [[0,4], [8,12]]
+    precision_expected = 0.2
+    recall_expected = 0.84
+    precision, recall, _, f1 = compute_metrics(pars, rars, 0.8, 0.1)
+    success = (abs(precision_expected-precision)<epsilon) and (abs(recall_expected-recall)<epsilon)
+    if success==False:
+        fail_count += 1    
+
+    print("pars=",pars, ", rars=",rars,"precision_expected: ", precision_expected, ", precision_acutal: ", precision, "recall_expected: ", recall_expected, ", recall_actual: ", recall, "success: ", success)
+    print("f1: ",f1)
+
+    pars = [[3,7]]
+    rars = [[0,4], [8,12]]
+    precision_expected = 0.4
+    recall_expected = 0.44
+    precision, recall, _, f1 = compute_metrics(pars, rars, 0.8, 0.1)
+    success = (abs(precision_expected-precision)<epsilon) and (abs(recall_expected-recall)<epsilon)
+    if success==False:
+        fail_count += 1    
+
+    print("pars=",pars, ", rars=",rars,"precision_expected: ", precision_expected, ", precision_acutal: ", precision, "recall_expected: ", recall_expected, ", recall_actual: ", recall, "success: ", success)
+    print("f1: ",f1)
+
+    print("fail_count: ", fail_count)
+    # pars = [[7,11]]
+    # rars = [[6,7]]
+    # precision, recall, F_beta, F1 = compute_metrics(pars, rars, 0.8, 0.1)
+    # print("precsion: ", precision, ", recall: ", recall)
 
     
 
